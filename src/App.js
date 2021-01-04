@@ -9,6 +9,9 @@ import {
 import InfoBox from "./InfoBox";
 import Map from "./Map";
 import "./App.css";
+import Table from "./Table";
+import { sortData } from "./util";
+import LineGraph from "./LineGraph";
 
 function App() {
   // STATE (React hook)-> How to write a VARIABLE in REACT
@@ -20,6 +23,8 @@ function App() {
   const [country, setCountry] = useState("worldwide");
   // sets individual country data
   const [countryInfo, setCountryInfo] = useState({});
+  //  sets TABLE 
+  const [tableData, setTableData] = useState([]);
 
   // sets Worldwide data on first page load
   useEffect(() => {
@@ -28,7 +33,6 @@ function App() {
     .then(data => {
       setCountryInfo(data);
     })
-
   }, [])
 
   useEffect(() => {
@@ -45,6 +49,8 @@ function App() {
             value: country.countryInfo.iso2, // UK, USA, FR etc
           }));
 
+          const sortedData = sortData(data);
+          setTableData(sortedData);
           setCountries(countries);
         });
     };
@@ -119,9 +125,9 @@ function App() {
       <Card className="app_right">
         <CardContent>
           <h3>Live Cases by Country</h3>
-          {/* TABLE */}
+          <Table countries={tableData}/>
           <h3>Worldwide New Cases</h3>
-          {/* GRAPH */}
+          <LineGraph />
         </CardContent>
       </Card>
     </div>
