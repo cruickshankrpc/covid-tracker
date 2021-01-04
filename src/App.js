@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { MenuItem, FormControl, Select, Card} from "@material-ui/core";
+import {
+  MenuItem,
+  FormControl,
+  Select,
+  Card,
+  CardContent,
+} from "@material-ui/core";
 import InfoBox from "./InfoBox";
 import Map from "./Map";
 import "./App.css";
@@ -12,6 +18,18 @@ function App() {
   const [countries, setCountries] = useState([]);
   // sets Worldwide as default state
   const [country, setCountry] = useState("worldwide");
+  // sets individual country data
+  const [countryInfo, setCountryInfo] = useState({});
+
+  // sets Worldwide data on first page load
+  useEffect(() => {
+    fetch("https://disease.sh/v3/covid-19/all")
+    .then(response => response.json())
+    .then(data => {
+      setCountryInfo(data);
+    })
+
+  }, [])
 
   useEffect(() => {
     // code in here runs only once when component loads
@@ -39,7 +57,28 @@ function App() {
     console.log("COUNTRYSTICK", countryCode);
     // Sets clicked country as new state
     setCountry(countryCode);
+
+    // TERNARY OPERATOR
+    // IF dropdown is WORLDWIDE
+    const url =
+      countryCode === "worldwide"
+        ? // IF TRUTHY execute this condition
+          "https://disease.sh/v3/covid-19/all"
+        : // IF FALSEY execute this condition
+          `https://disease.sh/v3/covid-19/countries/${countryCode}`;
+
+    // ASYNCHRONOUS
+    // WAIT for url just specified..
+    await fetch(url)
+      // THEN get response(data) and turn into json
+      .then((response) => response.json())
+      .then((data) => {
+        setCountry(countryCode);
+        // store info from country from response into variable:
+        setCountryInfo(data);
+      });
   };
+  console.log('COUNTRYINFO>>>', countryInfo )
 
   return (
     // BEM naming convention
@@ -66,9 +105,9 @@ function App() {
         </div>
 
         <div className="app_stats">
-          <InfoBox title="Coronavirus Cases" cases={123} total={2000} />
-          <InfoBox title="Deaths" cases={12345} total={3000} />
-          <InfoBox title="Recovered" cases={1234} total={4000} />
+          <InfoBox title="Coronavirus Cases" cases={countryInfo.todayCases} total={countryInfo.cases} />
+          <InfoBox title="Deaths" cases={countryInfo.todayDeaths} total={countryInfo.deaths} />
+          <InfoBox title="Recovered" cases={countryInfo.todayRecovered} total={countryInfo.recovered} />
           {/* INFOBOX title="Coronavirus cases" */}
           {/* INFOBOX */}
           {/* INFOBOX */}
@@ -78,8 +117,12 @@ function App() {
         <Map />
       </div>
       <Card className="app_right">
-        {/* TABLE */}
-        {/* GRAPH */}
+        <CardContent>
+          <h3>Live Cases by Country</h3>
+          {/* TABLE */}
+          <h3>Worldwide New Cases</h3>
+          {/* GRAPH */}
+        </CardContent>
       </Card>
     </div>
   );

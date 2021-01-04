@@ -9,6 +9,12 @@ body {
   color: white;
 }
 
+.app {
+  display: flex;
+  justify-content: space-evenly;
+  padding: 20px;
+}
+
 .app_header {
   display: flex;
   align-items: center;
@@ -17,7 +23,18 @@ body {
   font-family: 'Oswald', sans-serif;
 }
 
+.app-left {
+  flex:0.9;
+}
+
 .app_stats {
   display:flex;
   justify-content: space-between;
 }
+
+@media (max-widtH: 990px) {
+  .app {
+    flex-direction: column;
+  }
+}
+
