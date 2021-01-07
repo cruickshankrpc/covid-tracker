@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "./App.css";
 import {
   MenuItem,
   FormControl,
@@ -8,23 +9,24 @@ import {
 } from "@material-ui/core";
 import InfoBox from "./InfoBox";
 import Map from "./Map";
-import "./App.css";
 import Table from "./Table";
-import { sortData } from "./util";
+import { sortData, prettyPrintStat } from "./util";
+import numeral from "numeral";
 import LineGraph from "./LineGraph";
+import "leaflet/dist/leaflet.css";
 
 function App() {
   // STATE (React hook)-> How to write a VARIABLE in REACT
   // EFFECT (React hook)-> Runs piece of code based on given condition
 
-  // sets our country DATA
   const [countries, setCountries] = useState([]);
-  // sets Worldwide as default state
-  const [country, setCountry] = useState("worldwide");
-  // sets individual country data
+  const [country, setInputCountry] = useState("worldwide");
   const [countryInfo, setCountryInfo] = useState({});
-  //  sets TABLE 
   const [tableData, setTableData] = useState([]);
+  const [mapCenter, setMapCenter] = useState({ lat: 34.80746, lng: -40.4796 });
+  const [mapZoom, setMapZoom] = useState(3);
+  const [mapCountries, setMapCountries] = useState([]);
+  const [casesType, setCasesType] = useState("cases");
 
   // sets Worldwide data on first page load
   useEffect(() => {
@@ -32,8 +34,8 @@ function App() {
     .then(response => response.json())
     .then(data => {
       setCountryInfo(data);
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
     // code in here runs only once when component loads
@@ -41,28 +43,27 @@ function App() {
     // ASYNC -> send a request, wait for it, then do something with info
     // no need for axios -> xtra dependencies...
     const getCountriesData = async () => {
-      await fetch("https://disease.sh/v3/covid-19/countries")
+      fetch("https://disease.sh/v3/covid-19/countries")
         .then((response) => response.json())
         .then((data) => {
           const countries = data.map((country) => ({
             name: country.country, // United States, United Kingdom etc
             value: country.countryInfo.iso2, // UK, USA, FR etc
           }));
-
-          const sortedData = sortData(data);
-          setTableData(sortedData);
+          let sortedData = sortData(data);
           setCountries(countries);
+          setMapCountries(data);
+          setTableData(sortedData);
         });
     };
     getCountriesData();
   }, []);
 
   // LISTENS for EVENT(CLICK) on dropdown menu
-  const onCountryChange = async (event) => {
-    const countryCode = event.target.value;
+  const onCountryChange = async (e) => {
+    const countryCode = e.target.value;
     console.log("COUNTRYSTICK", countryCode);
     // Sets clicked country as new state
-    setCountry(countryCode);
 
     // TERNARY OPERATOR
     // IF dropdown is WORLDWIDE
@@ -72,18 +73,21 @@ function App() {
           "https://disease.sh/v3/covid-19/all"
         : // IF FALSEY execute this condition
           `https://disease.sh/v3/covid-19/countries/${countryCode}`;
-
     // ASYNCHRONOUS
     // WAIT for url just specified..
     await fetch(url)
       // THEN get response(data) and turn into json
       .then((response) => response.json())
       .then((data) => {
-        setCountry(countryCode);
+        setInputCountry(countryCode);
         // store info from country from response into variable:
         setCountryInfo(data);
+        // recenter map to country
+        setMapCenter([data.countryInfo.lat, data.countryInfo.long]);
+        setMapZoom(4);
       });
   };
+
   console.log('COUNTRYINFO>>>', countryInfo )
 
   return (
@@ -111,23 +115,46 @@ function App() {
         </div>
 
         <div className="app_stats">
-          <InfoBox title="Coronavirus Cases" cases={countryInfo.todayCases} total={countryInfo.cases} />
-          <InfoBox title="Deaths" cases={countryInfo.todayDeaths} total={countryInfo.deaths} />
-          <InfoBox title="Recovered" cases={countryInfo.todayRecovered} total={countryInfo.recovered} />
-          {/* INFOBOX title="Coronavirus cases" */}
-          {/* INFOBOX */}
-          {/* INFOBOX */}
+          <InfoBox 
+          isRed
+          active={casesType === "cases"}
+          onClick={(e) => setCasesType("cases")}
+          title="Coronavirus Cases" 
+          cases={prettyPrintStat(countryInfo.todayCases)} 
+          total={numeral(countryInfo.cases).format("0.0a")} 
+          />
+          <InfoBox 
+          isRed
+          active={casesType === "deaths"}
+          onClick={(e) => setCasesType("deaths")}
+          title="Deaths" 
+          cases={prettyPrintStat(countryInfo.todayDeaths)} 
+          total={numeral(countryInfo.deaths).format("0.0a")} 
+          />
+          <InfoBox 
+          active={casesType === "recovered"}
+          onClick={(e) => setCasesType("recovered")}
+          title="Recovered" 
+          cases={prettyPrintStat(countryInfo.todayRecovered)} 
+          total={numeral(countryInfo.recovered).format("0.0a")} 
+          />
         </div>
 
-        {/* MAP */}
-        <Map />
+        <Map
+        countries={mapCountries}
+        casesType={casesType}
+        center={mapCenter}
+        zoom={mapZoom}
+          />
       </div>
       <Card className="app_right">
         <CardContent>
+          <div className="app_information">
           <h3>Live Cases by Country</h3>
           <Table countries={tableData}/>
-          <h3>Worldwide New Cases</h3>
-          <LineGraph />
+              <h3>Worldwide New {casesType}</h3>
+          <LineGraph casesType={casesType}/>
+          </div>
         </CardContent>
       </Card>
     </div>

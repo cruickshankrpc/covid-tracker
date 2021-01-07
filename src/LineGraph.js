@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import numeral from "numeral";
 
-// pass this object into LINE file
+// pass this object into LINE file (formatting for React ChartJS)
 const options = {
   legend: {
     display: false,
@@ -47,7 +47,8 @@ const options = {
   },
 };
 
-function LineGraph() {
+// DESTRUCTURED PROP: default to CASES
+function LineGraph({ casesType = 'cases' }) {
   const [data, setData] = useState({});
 
   useEffect(() => {
@@ -80,14 +81,14 @@ function LineGraph() {
         };
         chartData.push(newDataPoint);
       }
-      lastDataPoint = data["cases"][date];
+      lastDataPoint = data[casesType][date];
     };
     return chartData;
   };
 
   return (
     <div>
-      <h1>I'm a graph</h1>
+      {/* OPTIONAL CHAINING - checks if data exists, returns as undefined if not (prevents crash) */}
       {data?.length > 0 && (
         <Line 
         options={options}
