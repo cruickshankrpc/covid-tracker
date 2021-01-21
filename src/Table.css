@@ -13,8 +13,10 @@
 
 .table td {
   padding: 0.5rem;
+  border: none;
 }
 
+/* For every alternate row */
 .table tr:nth-of-type(odd) {
   background-color: rgba(211, 211, 211, 0.426);
 }

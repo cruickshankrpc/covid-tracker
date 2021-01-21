@@ -9,7 +9,7 @@ const options = {
   },
   elements: {
     point: {
-      radius: 0
+      radius: 0,
     },
   },
   maintainAspectRatio: false,
@@ -47,8 +47,26 @@ const options = {
   },
 };
 
+const buildChartData = (data, casesType) => {
+  let chartData = [];
+  let lastDataPoint;
+  for(let date in data.cases) {
+    if (lastDataPoint) {
+      // create new data point object with x & y keys
+      let newDataPoint = {
+        x: date,
+        // calculate difference in cases from last date to find new cases
+        y: data[casesType][date] - lastDataPoint,
+      };
+      chartData.push(newDataPoint);
+    }
+    lastDataPoint = data[casesType][date];
+  };
+  return chartData;
+};
+
 // DESTRUCTURED PROP: default to CASES
-function LineGraph({ casesType = 'cases' }) {
+function LineGraph({ casesType }) {
   const [data, setData] = useState({});
 
   useEffect(() => {
@@ -57,34 +75,15 @@ function LineGraph({ casesType = 'cases' }) {
       .then((response) => response.json())
       .then((data) => {
         console.log("LINEGRAPH DATA>>>", data);
-        let chartData = buildChartData(data, "cases");
+        let chartData = buildChartData(data, casesType);
         console.log("CHARTDATA>>>", chartData)
         setData(chartData);
       });
     }; 
     fetchData();
-  }, []);
+  }, [casesType]);
 
 
-  const buildChartData = (data, casesType = "cases") => {
-    let chartData = [];
-    let lastDataPoint;
-
-
-    for(let date in data.cases) {
-      if (lastDataPoint) {
-        // create new data point object with x & y keys
-        let newDataPoint = {
-          x: date,
-          // calculate difference in cases from last date to find new cases
-          y: data[casesType][date] - lastDataPoint,
-        };
-        chartData.push(newDataPoint);
-      }
-      lastDataPoint = data[casesType][date];
-    };
-    return chartData;
-  };
 
   return (
     <div>
@@ -101,12 +100,8 @@ function LineGraph({ casesType = 'cases' }) {
           },
         ],
         }}
-  
         />
-
       )}
-      
-      
     </div>
   );
 }

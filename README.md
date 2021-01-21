@@ -6,6 +6,7 @@
 ### React Chart JS 2 (dependency/library, linegraph)
 numeral -> formats numbers 
 react leaflet -> 
+Material UI
 
 PROBLEMS: 
 - Map is actually MapContainer in documentation. 
@@ -17,3 +18,5 @@ use SPREAD OPERATOR for PROPS inside infoBox argument, add props.onClick to Card
 boolean isRed 
 String INTERPOLATION to select class to change recovered text GREEN 
 infoBox cursor:pointer 
+CSS:
+overflow: scroll

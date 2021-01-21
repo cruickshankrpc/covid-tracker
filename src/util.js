@@ -22,6 +22,7 @@ const casesTypeColors = {
     half_op: "rgba(251, 68, 67, 0.5)",
     multiplier: 2000,
   },
+ 
 };
 
 // THIS SORTS DATA FROM HIGHEST
@@ -48,10 +49,11 @@ export const showDataOnMap = (data, casesType = "cases") =>
       fillColor={casesTypeColors[casesType].hex}
       fillOpacity={0.4}
       radius={
-        // logic to create circles around case areas
-        Math.sqrt(country[casesType]) * casesTypeColors[casesType].multiplier
+        // logic to create circles around case areas. These got to be too big so I divided
+        (Math.sqrt(country[casesType]) * casesTypeColors[casesType].multiplier) / 2
       }
     >
+
       <Popup>
         <div className="info-container">
           <div
