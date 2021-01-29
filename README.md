@@ -11,7 +11,7 @@ In order to keep up with React and to see how working devs use it to develop app
 - Material UI
 
 ## PROBLEMS: 
-- Map wouldn't work - read documentation and update had changed it to MapContainer in documentation, needed to
+- Map wouldn't work - read documentation and update had changed it to MapContainer in documentation, needed to import ChangeView in order to center and zoom the map. 
 ```js
   <div className="map">
       <MapContainer>
